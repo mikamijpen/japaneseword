@@ -5,6 +5,7 @@ from dataclasses import dataclass, asdict
 from typing import List, Optional
 import uuid
 from datetime import datetime, date
+import random
 from logger import logger
 from utils import resource_path
 
@@ -89,7 +90,7 @@ class WordManager:
         self.save_data()
     
     def get_review_words(self, count: int = 10, word_type: Optional[str] = None) -> List[Word]:
-        """根据复习算法获取单词列表"""
+        """根据复习算法获取单词列表。如果得分最高的单词超过指定数量，则从相同分数的单词中随机选择。"""
         today = date.today()
         word_scores = []
 
@@ -97,24 +98,45 @@ class WordManager:
         if word_type:
             source_words = [word for word in self.words if word.word_type == word_type]
 
+        if not source_words:
+            return []
+
         for word in source_words:
             try:
                 review_date_str = word.last_review_time or word.created_time
                 review_date = date.fromisoformat(review_date_str)
                 days_diff = (today - review_date).days
             except (ValueError, TypeError):
-                # 如果日期格式无效或不存在，则给予一个较高的分数
                 days_diff = 365  
 
             x = 7 if not word.remembered else 0
             score = days_diff + x
             word_scores.append((score, word))
         
-        # 按分数降序排序
         word_scores.sort(key=lambda x: x[0], reverse=True)
         
-        # 返回得分最高的N个单词
-        return [word for score, word in word_scores[:count]]
+        if len(word_scores) <= count:
+            return [word for score, word in word_scores]
+
+        words_by_score = {}
+        for score, word in word_scores:
+            if score not in words_by_score:
+                words_by_score[score] = []
+            words_by_score[score].append(word)
+
+        result_words = []
+        sorted_scores = sorted(words_by_score.keys(), reverse=True)
+
+        for score in sorted_scores:
+            words_in_group = words_by_score[score]
+            if len(result_words) + len(words_in_group) < count:
+                result_words.extend(words_in_group)
+            else:
+                num_to_add = count - len(result_words)
+                result_words.extend(random.sample(words_in_group, num_to_add))
+                break
+        
+        return result_words
 
     def get_words_by_type(self, word_type: str) -> List[Word]:
         """获取指定类型的单词"""
