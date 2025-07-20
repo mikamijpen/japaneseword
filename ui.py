@@ -18,9 +18,79 @@ class JapaneseWordApp:
         self.current_search_keyword = ""  # 当前搜索关键词
         self.review_words = []  # 复习模式下的单词
         self.is_review_mode = False  # 是否在复习模式
+        self.is_dark_mode = False
         
         self.setup_ui()
         self.refresh_type_list()
+
+    def toggle_dark_mode(self):
+        """切换暗黑/明亮模式"""
+        self.is_dark_mode = not self.is_dark_mode
+        if self.is_dark_mode:
+            self.dark_mode_button.config(text="明亮模式")
+            self.apply_dark_theme()
+        else:
+            self.dark_mode_button.config(text="暗黑模式")
+            self.apply_light_theme()
+
+    def apply_dark_theme(self):
+        """应用暗黑主题"""
+        bg_color = "#2b2b2b"
+        fg_color = "#dcdcdc" # white-gray
+        entry_bg = "#3c3f41"
+        select_bg = "#4a6984"
+        button_bg = "#555555"
+
+        self.root.config(bg=bg_color)
+        
+        style = ttk.Style(self.root)
+        style.theme_use('clam')
+
+        style.configure('.', background=bg_color, foreground=fg_color)
+        style.configure('TFrame', background=bg_color)
+        style.configure('TLabel', background=bg_color, foreground=fg_color)
+        style.configure('TLabelFrame', background=bg_color, foreground=fg_color)
+        style.configure('TLabelFrame.Label', background=bg_color, foreground=fg_color)
+
+        style.configure('TButton', background=button_bg, foreground=fg_color, borderwidth=1)
+        style.map('TButton', background=[('active', '#6a6a6a')])
+        
+        style.configure('TEntry', fieldbackground=entry_bg, foreground=fg_color, insertcolor=fg_color)
+        
+        style.configure('Treeview', background=entry_bg, foreground=fg_color, fieldbackground=entry_bg)
+        style.map('Treeview', background=[('selected', select_bg)])
+        style.configure('Treeview.Heading', background=button_bg, foreground=fg_color, relief='flat')
+        style.map('Treeview.Heading', background=[('active', '#6a6a6a')])
+
+        style.configure('TScrollbar', troughcolor=entry_bg, background=button_bg)
+
+        style.configure('TCombobox', fieldbackground=entry_bg, background=button_bg, foreground=fg_color)
+        
+        style.configure("TMenubutton", background=button_bg, foreground=fg_color)
+
+        # Non-ttk widgets
+        self.type_listbox.config(bg=entry_bg, fg=fg_color, selectbackground=select_bg, selectforeground='white',
+                                 highlightbackground=bg_color, borderwidth=0)
+        self.detail_text.config(bg=entry_bg, fg=fg_color, selectbackground=select_bg, selectforeground='white',
+                                insertbackground=fg_color, borderwidth=0)
+
+    def apply_light_theme(self):
+        """应用明亮主题 (恢复默认)"""
+        self.root.config(bg='SystemButtonFace')
+
+        style = ttk.Style(self.root)
+        try:
+            style.theme_use('vista')
+        except tk.TclError:
+            style.theme_use('clam')
+        
+        self.type_listbox.config(bg='white', fg='black', selectbackground='#0078D7', selectforeground='white')
+        self.detail_text.config(bg='white', fg='black', selectbackground='#0078D7', selectforeground='white', insertbackground='black')
+        # Manually refresh the widgets that were not updating correctly
+        self.refresh_type_list()
+        selection = self.type_listbox.curselection()
+        if selection:
+            self.on_type_select(None)
     
     def setup_ui(self):
         """设置界面"""
@@ -31,6 +101,7 @@ class JapaneseWordApp:
         # 配置网格权重
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
+        self.root.rowconfigure(1, weight=0)
         main_frame.columnconfigure(1, weight=2)
         main_frame.columnconfigure(2, weight=2)
         main_frame.rowconfigure(0, weight=1)
@@ -43,6 +114,10 @@ class JapaneseWordApp:
         
         # 右栏：单词详情
         self.setup_detail_panel(main_frame)
+
+        # 暗黑模式按钮
+        self.dark_mode_button = ttk.Button(self.root, text="暗黑模式", command=self.toggle_dark_mode)
+        self.dark_mode_button.grid(row=1, column=0, sticky=tk.E, padx=10, pady=5)
     
     def setup_type_panel(self, parent):
         """设置左栏类型面板"""
