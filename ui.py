@@ -75,22 +75,45 @@ class JapaneseWordApp:
                                 insertbackground=fg_color, borderwidth=0)
 
     def apply_light_theme(self):
-        """应用明亮主题 (恢复默认)"""
-        self.root.config(bg='SystemButtonFace')
+        """应用明亮主题"""
+        bg_color = "#f0f0f0"
+        fg_color = "black"
+        entry_bg = "white"
+        select_bg = "#0078d7"
+        button_bg = "#f0f0f0"
+
+        self.root.config(bg=bg_color)
 
         style = ttk.Style(self.root)
-        try:
-            style.theme_use('vista')
-        except tk.TclError:
-            style.theme_use('clam')
+        style.theme_use('clam')
+
+        style.configure('.', background=bg_color, foreground=fg_color)
+        style.configure('TFrame', background=bg_color)
+        style.configure('TLabel', background=bg_color, foreground=fg_color)
+        style.configure('TLabelFrame', background=bg_color, foreground=fg_color)
+        style.configure('TLabelFrame.Label', background=bg_color, foreground=fg_color)
+
+        style.configure('TButton', background=button_bg, foreground=fg_color, borderwidth=1)
+        style.map('TButton', background=[('active', '#e5f1fb')])
         
-        self.type_listbox.config(bg='white', fg='black', selectbackground='#0078D7', selectforeground='white')
-        self.detail_text.config(bg='white', fg='black', selectbackground='#0078D7', selectforeground='white', insertbackground='black')
-        # Manually refresh the widgets that were not updating correctly
-        self.refresh_type_list()
-        selection = self.type_listbox.curselection()
-        if selection:
-            self.on_type_select(None)
+        style.configure('TEntry', fieldbackground=entry_bg, foreground=fg_color, insertcolor=fg_color)
+        
+        style.configure('Treeview', background=entry_bg, foreground=fg_color, fieldbackground=entry_bg)
+        style.map('Treeview', background=[('selected', select_bg)])
+        style.configure('Treeview.Heading', background=button_bg, foreground=fg_color, relief='flat')
+        style.map('Treeview.Heading', background=[('active', '#e5f1fb')])
+
+        style.configure('TScrollbar', troughcolor=entry_bg, background=button_bg)
+
+        style.configure('TCombobox', fieldbackground=entry_bg, background=button_bg, foreground=fg_color)
+        
+        style.configure("TMenubutton", background=button_bg, foreground=fg_color)
+
+        # Non-ttk widgets
+        self.type_listbox.config(bg=entry_bg, fg=fg_color, selectbackground=select_bg, selectforeground='white',
+                                 highlightbackground=bg_color, borderwidth=0)
+        self.detail_text.config(bg=entry_bg, fg=fg_color, selectbackground=select_bg, selectforeground='white',
+                                insertbackground=fg_color, borderwidth=0)
     
     def setup_ui(self):
         """设置界面"""
@@ -217,10 +240,19 @@ class JapaneseWordApp:
         detail_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
         self.detail_text.configure(yscrollcommand=detail_scrollbar.set)
         
+        # 按钮框架
+        button_frame = ttk.Frame(detail_frame)
+        button_frame.grid(row=1, column=0, columnspan=2, pady=(10, 0), sticky=tk.W)
+
         # 记住按钮
-        self.remember_button = ttk.Button(detail_frame, text="标记为已记住", command=self.toggle_remember)
-        self.remember_button.grid(row=1, column=0, pady=(10, 0))
+        self.remember_button = ttk.Button(button_frame, text="标记为已记住", command=self.toggle_remember)
+        self.remember_button.pack(side=tk.LEFT, padx=(0, 5))
         self.remember_button.config(state=tk.DISABLED)
+        
+        # 修改按钮
+        self.edit_button = ttk.Button(button_frame, text="修改", command=self.edit_word_dialog)
+        self.edit_button.pack(side=tk.LEFT, padx=(0, 5))
+        self.edit_button.config(state=tk.DISABLED)
         
         # 配置网格权重
         detail_frame.columnconfigure(0, weight=1)
@@ -384,6 +416,7 @@ class JapaneseWordApp:
             
             # 更新按钮状态和文本
             self.remember_button.config(state=tk.NORMAL)
+            self.edit_button.config(state=tk.NORMAL)
             if self.current_word.remembered:
                 self.remember_button.config(text="标记为未记住")
             else:
@@ -391,6 +424,7 @@ class JapaneseWordApp:
         else:
             self.detail_text.insert(1.0, "请选择一个单词查看详情")
             self.remember_button.config(state=tk.DISABLED)
+            self.edit_button.config(state=tk.DISABLED)
         
         self.detail_text.config(state=tk.DISABLED)
     
@@ -422,6 +456,26 @@ class JapaneseWordApp:
                     self.refresh_word_list(word_type)
         self.refresh_type_list()
     
+    def edit_word_dialog(self):
+        """修改单词对话框"""
+        if not self.current_word:
+            return
+
+        dialog = EditWordDialog(self.root, self.word_manager, self.current_word)
+        if dialog.result:
+            self.update_detail_display()
+            # 刷新列表中的单词显示
+            selection = self.type_listbox.curselection()
+            if selection:
+                selected_text = self.type_listbox.get(selection[0])
+                if selected_text.startswith("复习"):
+                    self.refresh_word_list("复习")
+                elif selected_text.startswith("搜索结果"):
+                    self.refresh_word_list("搜索结果")
+                else:
+                    word_type = selected_text.split(' ')[0]
+                    self.refresh_word_list(word_type)
+
     def add_word_dialog(self):
         """添加单词对话框"""
         dialog = AddWordDialog(self.root, self.word_manager)
@@ -464,6 +518,88 @@ class JapaneseWordApp:
                         word_type = selected_text.split(' ')[0]
                         self.refresh_word_list(word_type)
             self.update_detail_display()
+
+class EditWordDialog:
+    def __init__(self, parent, word_manager, word):
+        self.word_manager = word_manager
+        self.word = word
+        self.result = None
+        
+        self.dialog = tk.Toplevel(parent)
+        self.dialog.title("修改单词")
+        self.dialog.geometry("400x300")
+        self.dialog.transient(parent)
+        self.dialog.grab_set()
+        
+        self.setup_dialog_ui()
+        
+        self.dialog.geometry("+%d+%d" % (parent.winfo_rootx() + 50, parent.winfo_rooty() + 50))
+        self.dialog.wait_window()
+    
+    def setup_dialog_ui(self):
+        main_frame = ttk.Frame(self.dialog, padding="20")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        ttk.Label(main_frame, text="日语单词:").grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
+        self.japanese_entry = ttk.Entry(main_frame, width=30)
+        self.japanese_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), pady=(0, 5))
+        self.japanese_entry.insert(0, self.word.japanese)
+        self.japanese_entry.focus()
+        
+        ttk.Label(main_frame, text="词性:").grid(row=1, column=0, sticky=tk.W, pady=(0, 5))
+        self.type_combo = ttk.Combobox(main_frame, width=27, state="readonly")
+        self.type_combo['values'] = [wt.value for wt in WordType]
+        try:
+            self.type_combo.set(self.word.word_type)
+        except tk.TclError:
+            self.type_combo.current(0)
+        self.type_combo.grid(row=1, column=1, sticky=(tk.W, tk.E), pady=(0, 5))
+        
+        ttk.Label(main_frame, text="解释:").grid(row=2, column=0, sticky='nw', pady=(0, 5))
+        self.explanation_text = tk.Text(main_frame, width=30, height=8)
+        self.explanation_text.grid(row=2, column=1, sticky="nsew", pady=(0, 5))
+        self.explanation_text.insert(1.0, self.word.explanation)
+        
+        button_frame = ttk.Frame(main_frame)
+        button_frame.grid(row=3, column=0, columnspan=2, pady=(10, 0))
+        
+        ttk.Button(button_frame, text="保存", command=self.save_word).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(button_frame, text="取消", command=self.dialog.destroy).pack(side=tk.LEFT)
+        
+        main_frame.columnconfigure(1, weight=1)
+        main_frame.rowconfigure(2, weight=1)
+        
+        self.dialog.bind('<Return>', self.handle_return)
+
+    def handle_return(self, event):
+        if self.dialog.focus_get() != self.explanation_text:
+            self.save_word()
+
+    def save_word(self):
+        japanese = self.japanese_entry.get().strip()
+        word_type = self.type_combo.get()
+        explanation = self.explanation_text.get(1.0, tk.END).strip()
+        
+        if not japanese:
+            messagebox.showwarning("警告", "请输入日语单词", parent=self.dialog)
+            return
+        
+        if not explanation:
+            messagebox.showwarning("警告", "请输入解释内容", parent=self.dialog)
+            return
+        
+        self.word_manager.update_word(
+            self.word.id,
+            japanese=japanese,
+            word_type=word_type,
+            explanation=explanation
+        )
+        # Update local object as well
+        self.word.japanese = japanese
+        self.word.word_type = word_type
+        self.word.explanation = explanation
+        self.result = self.word
+        self.dialog.destroy()
 
 class AddWordDialog:
     def __init__(self, parent, word_manager):
@@ -520,7 +656,13 @@ class AddWordDialog:
         main_frame.rowconfigure(2, weight=1)
         
         # 绑定回车键
-        self.dialog.bind('<Return>', lambda e: self.add_word())
+        self.dialog.bind('<Return>', self.handle_return)
+    
+    def handle_return(self, event):
+        """处理回车键事件"""
+        # 如果焦点不在解释文本框上，则添加单词
+        if self.dialog.focus_get() != self.explanation_text:
+            self.add_word()
     
     def add_word(self):
         """添加单词"""
@@ -529,11 +671,11 @@ class AddWordDialog:
         explanation = self.explanation_text.get(1.0, tk.END).strip()
         
         if not japanese:
-            messagebox.showwarning("警告", "请输入日语单词")
+            messagebox.showwarning("警告", "请输入日语单词", parent=self.dialog)
             return
         
         if not explanation:
-            messagebox.showwarning("警告", "请输入解释内容")
+            messagebox.showwarning("警告", "请输入解释内容", parent=self.dialog)
             return
         
         # 添加单词
