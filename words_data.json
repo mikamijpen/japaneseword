@@ -264,7 +264,7 @@
     "id": "17f4add8-ea83-469e-94ee-995a9f606677",
     "japanese": "気づく",
     "word_type": "vi",
-    "explanation": "[きづく] [kizuku] ② \n【自动词・五段/一类】\n1.realize , find out\n\n（それまで意識になかったことに、思いが及ぶ）。\n\n彼に気づかれないように用心しろ。 \n\n当心别叫他发觉了。",
+    "explanation": "[きづく] [kizuku] ② \n【自动词・五段/一类】\n1.realize , find out\nそれまで意識になかったことに、思いが及ぶ\n\n\n\n彼に気づかれないように用心しろ。 \n\n当心别叫他发觉了。",
     "remembered": false,
     "created_time": "2025-07-22",
     "last_review_time": ""
@@ -300,9 +300,81 @@
     "id": "3fbdf6c9-6a94-416f-982e-bf9041163a65",
     "japanese": "ほんの",
     "word_type": "else",
-    "explanation": "【连体词】\njust/a little\n\nほんの子どもだまし \n\n只是骗小孩的小把戏\n\nほんのひと口 \n一杯；少量的酒",
+    "explanation": "【连体词】adv.\njust/a little\n\nほんの子どもだまし \n\n只是骗小孩的小把戏\n\nほんのひと口 \n一杯；少量的酒",
     "remembered": false,
     "created_time": "2025-07-22",
+    "last_review_time": ""
+  },
+  {
+    "id": "38091001-59ed-4bc6-afe3-e2f186db8e49",
+    "japanese": "ゆうべ",
+    "word_type": "n",
+    "explanation": "last night informal",
+    "remembered": false,
+    "created_time": "2025-08-02",
+    "last_review_time": ""
+  },
+  {
+    "id": "f21e51a8-3043-4c40-a30f-5360fa34605f",
+    "japanese": "なんとなく / 何だか",
+    "word_type": "else",
+    "explanation": "adv. Somehow, unconsciously  \n\nなんとなくスマホをいじって時間を潰した。  \n(I idly played with my smartphone to kill time.)  \n\n彼の説明はなんとなく分かったけど、完全には理解できなかった。  \n(I sort of understood his explanation, but didn't fully grasp it.)  \n\n何だか (meaning \"somehow\" or \"for some reason\") places more emphasis on \"having a vague reason that's hard to articulate.\"\n何だか悲しい",
+    "remembered": false,
+    "created_time": "2025-08-02",
+    "last_review_time": ""
+  },
+  {
+    "id": "dd3eb2c7-1c49-4f42-b140-f762134de370",
+    "japanese": "発音",
+    "word_type": "n",
+    "explanation": "はつおん\n\n名・他动词・サ变/三类\n音を発すること。音を出すこと。特に、音声を発生調整する作用\n\n英語の発音を練習する。",
+    "remembered": false,
+    "created_time": "2025-08-02",
+    "last_review_time": ""
+  },
+  {
+    "id": "4019254f-0784-4aa6-af73-f48a103fea72",
+    "japanese": "短い",
+    "word_type": "adj1",
+    "explanation": "[みじかい]\nある（端の）点から他の（端の）点までの隔たりが小さい。\n\n髪を短く切る。 \n\n把头发剪短。\n\n気が短い。 \n\n性急。\n\nみじかくする\nshorten",
+    "remembered": false,
+    "created_time": "2025-08-02",
+    "last_review_time": ""
+  },
+  {
+    "id": "52378505-4a45-4bb2-92cc-f0f591318605",
+    "japanese": "免許",
+    "word_type": "n",
+    "explanation": "[めんきょ] [mennkyo] ① \n【名・他动词・サ变/三类】\n1。 Approval. Permission. License.\n\n運転免許証。 \n\n驾驶证。驾驶执照。",
+    "remembered": false,
+    "created_time": "2025-08-07",
+    "last_review_time": ""
+  },
+  {
+    "id": "3a6e31df-163e-4b62-8c51-e8cc960015b0",
+    "japanese": "なるべく",
+    "word_type": "else",
+    "explanation": "【句首副词】\n1.同：成る可く ;as ... as possible\nできるかぎり。\n\n\nなるべく安静にしていなさい。 \n\n尽量要静卧。",
+    "remembered": false,
+    "created_time": "2025-08-07",
+    "last_review_time": ""
+  },
+  {
+    "id": "c84d2c19-f8c3-44ac-b3dd-e4c56bb6f681",
+    "japanese": "参る",
+    "word_type": "vi",
+    "explanation": "[まいる] [mairu] ① \n【自动词・五段/一类】\n1.去；来。（謙って）\n2.参拜。\n3.认输，败。\n\nまもなく車が参ります。\n\nお寺に参る。 Worship Buddha.\n\nすっかり参った。大败。",
+    "remembered": false,
+    "created_time": "2025-08-07",
+    "last_review_time": ""
+  },
+  {
+    "id": "da1df554-cd5c-4b06-aa71-0e1fe8e9e58e",
+    "japanese": "任せる",
+    "word_type": "vt",
+    "explanation": "[まかせる] [makaseru] ③ \n【他动词・一段/二类】\n1.委托；托付；交给。\nその件は僕に全権を任せておけ。 \nLeave that matter entirely to me.\n\n\n2.听任；任凭；follow\n\n他人の判断に任せる。 \nFollow people's judgment.",
+    "remembered": false,
+    "created_time": "2025-08-07",
     "last_review_time": ""
   }
 ]
